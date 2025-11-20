@@ -220,6 +220,11 @@
         display: flex;
         justify-content: space-between;
         margin-top: 40px;
+        display: none; /* Hide navigation by default */
+      }
+
+      .navigation.active {
+        display: flex; /* Show navigation only when quiz is active */
       }
 
       button {
@@ -349,6 +354,12 @@
       <div class="quiz-body">
         <!-- Introduction Page -->
         <div class="intro-container active" id="intro-page">
+          <h2>Welcome to the JavaScript & jQuery Quiz</h2>
+          <p>
+            This quiz will test your knowledge of JavaScript and jQuery
+            fundamentals with 15 multiple-choice questions.
+          </p>
+
           <div class="quiz-info">
             <h3>Quiz Information</h3>
             <div class="info-item">
@@ -427,7 +438,7 @@
 
         <!-- Additional questions would go here -->
 
-        <div class="navigation">
+        <div class="navigation" id="quiz-navigation">
           <button id="prev-btn" disabled>Previous</button>
           <button id="next-btn">Next</button>
           <button id="submit-btn" style="display: none">Submit Quiz</button>
@@ -546,6 +557,8 @@
           $("#intro-page").hide();
           // Show the first question
           $("#question-1").addClass("active");
+          // Show navigation buttons
+          $("#quiz-navigation").addClass("active");
           updateProgressBar();
           updateNavigationButtons();
         }
@@ -576,6 +589,7 @@
 
         // Handle next button click - move to next question
         $("#next-btn").click(function () {
+          if (!quizStarted) return; // Prevent navigation if quiz hasn't started
           if (currentQuestion < questions.length - 1) {
             showQuestion(currentQuestion + 1);
           }
@@ -583,6 +597,7 @@
 
         // Handle previous button click - move to previous question
         $("#prev-btn").click(function () {
+          if (!quizStarted) return; // Prevent navigation if quiz hasn't started
           if (currentQuestion > 0) {
             showQuestion(currentQuestion - 1);
           }
@@ -630,6 +645,7 @@
           // Reset UI
           $(".question-container").removeClass("active");
           $("#intro-page").show().addClass("active");
+          $("#quiz-navigation").removeClass("active");
           $(".option").removeClass("selected");
           $("#confirm-start").prop("checked", false);
           $("#start-quiz").prop("disabled", true);
@@ -662,4 +678,3 @@
     </script>
   </body>
 </html>
-

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JavaScript & jQuery Quiz</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      body {
+        background: #f8fafc;
+        color: #334155;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .quiz-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        width: 90%;
+        max-width: 800px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+      }
+
+      .quiz-header {
+        background: #1e293b;
+        color: white;
+        padding: 30px;
+        text-align: center;
+        border-bottom: 1px solid #334155;
+      }
+
+      .quiz-header h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+      }
+
+      .quiz-header p {
+        opacity: 0.8;
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      .quiz-body {
+        padding: 40px;
+      }
+
+      .intro-container {
+        text-align: center;
+        padding: 10px;
+      }
+
+      .intro-container h2 {
+        color: #1e293b;
+        margin-bottom: 24px;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .intro-container p {
+        margin-bottom: 20px;
+        color: #64748b;
+        font-size: 16px;
+      }
+
+      .quiz-info {
+        background-color: #f8fafc;
+        border-radius: 8px;
+        padding: 24px;
+        margin: 30px 0;
+        text-align: left;
+        border: 1px solid #e2e8f0;
+      }
+
+      .quiz-info h3 {
+        color: #1e293b;
+        margin-bottom: 16px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        color: #475569;
+      }
+
+      .info-item i {
+        color: #475569;
+        margin-right: 12px;
+        font-weight: 500;
+      }
+
+      .confirmation {
+        margin: 30px 0;
+        padding: 20px;
+        background-color: #f1f5f9;
+        border-radius: 8px;
+        border-left: 4px solid #475569;
+      }
+
+      .confirmation label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 500;
+        color: #334155;
+      }
+
+      .confirmation input {
+        margin-right: 12px;
+        transform: scale(1.2);
+      }
+
+      .start-btn {
+        background: #1e293b;
+        color: white;
+        font-size: 16px;
+        padding: 16px 48px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .start-btn:hover {
+        background: #334155;
+        transform: translateY(-1px);
+      }
+
+      .start-btn:disabled {
+        background-color: #cbd5e1;
+        color: #94a3b8;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .question-container {
+        margin-bottom: 30px;
+        display: none;
+      }
+
+      .question-container.active {
+        display: block;
+        animation: fadeIn 0.4s ease;
+      }
+
+      .question-number {
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 500;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .question-text {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: #1e293b;
+        line-height: 1.5;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .option {
+        background-color: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #334155;
+      }
+
+      .option:hover {
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+      }
+
+      .option.selected {
+        background-color: #f1f5f9;
+        border-color: #475569;
+      }
+
+      .option.correct {
+        background-color: #f0fdf4;
+        border-color: #16a34a;
+      }
+
+      .option.incorrect {
+        background-color: #fef2f2;
+        border-color: #dc2626;
+      }
+
+      .navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+        display: none; /* Hide navigation by default */
+      }
+
+      .navigation.active {
+        display: flex; /* Show navigation only when quiz is active */
+      }
+
+      button {
+        background: #475569;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        font-size: 15px;
+      }
+
+      button:hover {
+        background: #334155;
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        background-color: #cbd5e1;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .results-container {
+        text-align: center;
+        padding: 40px;
+        display: none;
+      }
+
+      .results-container h2 {
+        margin-bottom: 24px;
+        color: #1e293b;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .score {
+        font-size: 48px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 24px 0;
+      }
+
+      .score-text {
+        font-size: 18px;
+        margin-bottom: 32px;
+        color: #64748b;
+      }
+
+      .restart-btn {
+        background: #1e293b;
+        margin-top: 20px;
+        padding: 16px 40px;
+      }
+
+      .restart-btn:hover {
+        background: #334155;
+      }
+
+      .progress-bar {
+        height: 6px;
+        background-color: #e2e8f0;
+        border-radius: 3px;
+        margin-bottom: 30px;
+        overflow: hidden;
+      }
+
+      .progress {
+        height: 100%;
+        background: #1e293b;
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .quiz-body {
+          padding: 24px;
+        }
+
+        .question-text {
+          font-size: 18px;
+        }
+
+        .navigation {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        button {
+          width: 100%;
+        }
+
+        .quiz-header {
+          padding: 24px;
+        }
+
+        .quiz-header h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="quiz-container">
+      <div class="quiz-header">
+        <h1>JavaScript & jQuery Quiz</h1>
+        <p>Test your knowledge with these 15 questions</p>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+
+      <div class="quiz-body">
+        <!-- Introduction Page -->
+        <div class="intro-container active" id="intro-page">
+          <h2>Welcome to the JavaScript & jQuery Quiz</h2>
+          <p>
+            This quiz will test your knowledge of JavaScript and jQuery
+            fundamentals with 15 multiple-choice questions.
+          </p>
+
+          <div class="quiz-info">
+            <h3>Quiz Information</h3>
+            <div class="info-item">
+              <i>•</i>
+              <span
+                ><strong>15 questions</strong> about JavaScript and jQuery</span
+              >
+            </div>
+            <div class="info-item">
+              <i>•</i>
+              <span
+                ><strong>Multiple choice</strong> format with 4 options
+                each</span
+              >
+            </div>
+            <div class="info-item">
+              <i>•</i>
+              <span
+                ><strong>No time limit</strong> - take your time to think</span
+              >
+            </div>
+            <div class="info-item">
+              <i>•</i>
+              <span
+                >Navigate with <strong>Previous</strong> and
+                <strong>Next</strong> buttons</span
+              >
+            </div>
+            <div class="info-item">
+              <i>•</i>
+              <span
+                >See your <strong>score</strong> at the end of the quiz</span
+              >
+            </div>
+          </div>
+
+          <div class="confirmation">
+            <label>
+              <input type="checkbox" id="confirm-start" />
+              I understand this is a knowledge assessment and I'm ready to begin
+              the quiz
+            </label>
+          </div>
+
+          <button class="start-btn" id="start-quiz" disabled>Start Quiz</button>
+        </div>
+
+        <!-- Quiz Questions -->
+        <div class="question-container" id="question-1">
+          <div class="question-number">Question 1 of 15</div>
+          <div class="question-text">
+            Which method is used to select an element by its ID in jQuery?
+          </div>
+          <div class="options-container">
+            <div class="option" data-value="A">A. getElementById()</div>
+            <div class="option" data-value="B">B. querySelector()</div>
+            <div class="option" data-value="C">C. $()</div>
+            <div class="option" data-value="D">D. selectById()</div>
+          </div>
+        </div>
+
+        <div class="question-container" id="question-2">
+          <div class="question-number">Question 2 of 15</div>
+          <div class="question-text">
+            What does the 'this' keyword refer to in JavaScript?
+          </div>
+          <div class="options-container">
+            <div class="option" data-value="A">A. The current function</div>
+            <div class="option" data-value="B">B. The global object</div>
+            <div class="option" data-value="C">
+              C. The object that the function belongs to
+            </div>
+            <div class="option" data-value="D">D. The parent object</div>
+          </div>
+        </div>
+
+        <!-- Additional questions would go here -->
+
+        <div class="navigation" id="quiz-navigation">
+          <button id="prev-btn" disabled>Previous</button>
+          <button id="next-btn">Next</button>
+          <button id="submit-btn" style="display: none">Submit Quiz</button>
+        </div>
+      </div>
+
+      <div class="results-container">
+        <h2>Quiz Completed</h2>
+        <div class="score">0/15</div>
+        <div class="score-text">You scored 0 out of 15 questions correctly</div>
+        <button class="restart-btn">Restart Quiz</button>
+      </div>
+    </div>
+
+    <script>
+      // Document ready function - ensures the DOM is fully loaded before executing scripts
+      $(document).ready(function () {
+        // Quiz questions data - encoded to prevent easy inspection in developer tools
+        const questionData =
+          "W3sicXVlc3Rpb24iOiJXaGljaCBtZXRob2QgaXMgdXNlZCB0byBzZWxlY3QgYW4gZWxlbWVudCBieSBpdHMgSUQgaW4galF1ZXJ5PyIsIm9wdGlvbnMiOlsiZ2V0RWxlbWVudEJ5SWQoKSIsInF1ZXJ5U2VsZWN0b3IoKSIsIiQoKSIsInNlbGVjdEJ5SWQoKSJdLCJjb3JyZWN0QW5zd2VyIjoyfSx7InF1ZXN0aW9uIjoiV2hhdCBkb2VzIHRoZSAndGhpcycga2V5d29yZCByZWZlciB0byBpbiBKYXZhU2NyaXB0PyIsIm9wdGlvbnMiOlsiVGhlIGN1cnJlbnQgZnVuY3Rpb24iLCJUaGUgZ2xvYmFsIG9iamVjdCIsIlRoZSBvYmplY3QgdGhhdCB0aGUgZnVuY3Rpb24gYmVsb25ncyB0byIsIlRoZSBwYXJlbnQgb2JqZWN0Il0sImNvcnJlY3RBbnN3ZXIiOjJ9LHsicXVlc3Rpb24iOiJXaGljaCBvZiB0aGUgZm9sbG93aW5nIGlzIE5PVCBhIEphdmFTY3JpcHQgZGF0YSB0eXBlPyIsIm9wdGlvbnMiOlsiU3RyaW5nIiwiQm9vbGVhbiIsIk51bWJlciIsIkZsb2F0Il0sImNvcnJlY3RBbnN3ZXIiOjN9LHsicXVlc3Rpb24iOiJXaGF0IGRvZXMgdGhlIGpRdWVyeSBtZXRob2QgLmZhZGVPdXQoKSBkbz8iLCJvcHRpb25zIjpbIkhpZGVzIGFuIGVsZW1lbnQgYnkgc2V0dGluZyBkaXNwbGF5IHRvIG5vbmUiLCJHcmFkdWFsbHkgZGVjcmVhc2VzIHRoZSBvcGFjaXR5IG9mIGFuIGVsZW1lbnQiLCJDaGFuZ2VzIHRoZSBiYWNrZ3JvdW5kIGNvbG9yIG9mIGFuIGVsZW1lbnQiLCJTbGlkZXMgYW4gZWxlbWVudCB1cCJdLCJjb3JyZWN0QW5zd2VyIjoxfSx7InF1ZXN0aW9uIjoiSG93IGRvIHlvdSBjcmVhdGUgYSBmdW5jdGlvbiBpbiBKYXZhU2NyaXB0PyIsIm9wdGlvbnMiOlsiZnVuY3Rpb24gPSBteUZ1bmN0aW9uKCkiLCJmdW5jdGlvbiBteUZ1bmN0aW9uKCkiLCJmdW5jdGlvbjpteUZ1bmN0aW9uKCkiLCJjcmVhdGUgbXlGdW5jdGlvbigpIl0sImNvcnJlY3RBbnN3ZXIiOjF9LHsicXVlc3Rpb24iOiJXaGljaCBqUXVlcnkgbWV0aG9kIGlzIHVzZWQgdG8gcGVyZm9ybSBhbiBBSkFYIHJlcXVlc3Q/Iiwib3B0aW9ucyI6WyJhamF4KCkiLCJodHRwUmVxdWVzdCgpIiwiZ2V0SlNPTigpIiwibG9hZERhdGEoKSJdLCJjb3JyZWN0QW5zd2VyIjowfSx7InF1ZXN0aW9uIjoiV2hhdCB3aWxsICdjb25zb2xlLmxvZyh0eXBlb2YgbnVsbCknIG91dHB1dCBpbiBKYXZhU2NyaXB0PyIsIm9wdGlvbnMiOlsibnVsbCIsInVuZGVmaW5lZCIsIm9iamVjdCIsIm51bWJlciJdLCJjb3JyZWN0QW5zd2VyIjoyfSx7InF1ZXN0aW9uIjoiV2hpY2ggbWV0aG9kIGlzIHVzZWQgdG8gYXR0YWNoIGFuIGV2ZW50IGhhbmRsZXIgaW4galF1ZXJ5PyIsIm9wdGlvbnMiOlsiYXR0YWNoRXZlbnQoKSIsImFkZEV2ZW50TGlzdGVuZXIoKSIsIm9uKCkiLCJiaW5kRXZlbnQoKSJdLCJjb3JyZWN0QW5zd2VyIjoyfSx7InF1ZXN0aW9uIjoiV2hhdCBpcyB0aGUgcHVycG9zZSBvZiB0aGUgJ3VzZSBzdHJpY3QnIGRpcmVjdGl2ZSBpbiBKYXZhU2NyaXB0PyIsIm9wdGlvbnMiOlsiVG8gZW5mb3JjZSBzdHJpY3RlciB0eXBlIGNoZWNraW5nIiwiVG8gZW5hYmxlIG1vZGVybiBKYXZhU2NyaXB0IGZlYXR1cmVzIiwiVG8gZW5mb3JjZSBhIHN0cmljdGVyIHBhcnNpbmcgYW5kIGVycm9yIGhhbmRsaW5nIG1vZGUiLCJUbyBvcHRpbWl6ZSBjb2RlIHBlcmZvcm1hbmNlIl0sImNvcnJlY3RBbnN3ZXIiOjJ9LHsicXVlc3Rpb24iOiJXaGljaCBvZiB0aGUgZm9sbG93aW5nIGlzIGEgdmFsaWQgd2F5IHRvIGNyZWF0ZSBhbiBhcnJheSBpbiBKYXZhU2NyaXB0PyIsIm9wdGlvbnMiOlsidmFyIGFyciA9IFtdIiwidmFyIGFyciA9IHt9IiwidmFyIGFyciA9ICgpIiwidmFyIGFyciA9IC8vIl0sImNvcnJlY3RBbnN3ZXIiOjB9LHsicXVlc3Rpb24iOiJXaGF0IGRvZXMgdGhlIGpRdWVyeSAuZWFjaCgpIG1ldGhvZCBkbz8iLCJvcHRpb25zIjpbIkV4ZWN1dGVzIGEgZnVuY3Rpb24gZm9yIGVhY2ggbWF0Y2hlZCBlbGVtZW50IiwiQ2hlY2tzIGlmIGVhY2ggZWxlbWVudCBtYXRjaGVzIGEgc2VsZWN0b3IiLCJBZGRzIGEgY2xhc3MgdG8gZWFjaCBlbGVtZW50IiwiUmVtb3ZlcyBlYWNoIGVsZW1lbnQgZnJvbSB0aGUgRE9NIl0sImNvcnJlY3RBbnN3ZXIiOjB9LHsicXVlc3Rpb24iOiJXaGljaCBvcGVyYXRvciBpcyB1c2VkIGZvciBzdHJpY3QgZXF1YWxpdHkgY29tcGFyaXNvbiBpbiBKYXZhU2NyaXB0PyIsIm9wdGlvbnMiOlsiPT0iLCI9PT0iLCI9IiwiIT09Il0sImNvcnJlY3RBbnN3ZXIiOjF9LHsicXVlc3Rpb24iOiJIb3cgY2FuIHlvdSBwcmV2ZW50IHRoZSBkZWZhdWx0IGJlaGF2aW9yIG9mIGFuIGV2ZW50IGluIGpRdWVyeT8iLCJvcHRpb25zIjpbImV2ZW50LnN0b3AoKSIsImV2ZW50LnByZXZlbnREZWZhdWx0KCkiLCJldmVudC5jYW5jZWwoKSIsImV2ZW50LmhhbHQoKSJdLCJjb3JyZWN0QW5zd2VyIjoxfSx7InF1ZXN0aW9uIjoiV2hhdCBpcyB0aGUgcmVzdWx0IG9mIDIgKyAnMicgaW4gSmF2YVNjcmlwdD8iLCJvcHRpb25zIjpbIjQiLCIyMiIsIk5hTiIsIkVycm9yIl0sImNvcnJlY3RBbnN3ZXIiOjF9LHsicXVlc3Rpb24iOiJXaGljaCBqUXVlcnkgbWV0aG9kIGlzIHVzZWQgdG8gYWRkIGEgY2xhc3MgdG8gYW4gZWxlbWVudD8iLCJvcHRpb25zIjpbImFkZENsYXNzKCkiLCJhcHBlbmRDbGFzcygpIiwiY2xhc3NBZGQoKSIsInRvZ2dsZUNsYXNzKCkiXSwiY29ycmVjdEFuc3dlciI6MH1d";
+
+        // Decode questions from base64 string to JavaScript object
+        const questions = JSON.parse(atob(questionData));
+
+        // Quiz state variables
+        let currentQuestion = 0; // Tracks the current question index
+        let score = 0; // Tracks the user's score
+        let userAnswers = new Array(questions.length).fill(null); // Stores user answers
+        let quizStarted = false; // Tracks if quiz has started
+
+        // Initialize the quiz - sets up the initial state
+        function initializeQuiz() {
+          // Create question containers for all questions
+          for (let i = 0; i < questions.length; i++) {
+            if (i > 1) {
+              // Skip first two as they're already in HTML
+              createQuestionElement(i);
+            }
+          }
+
+          updateProgressBar();
+          updateNavigationButtons();
+        }
+
+        // Create a question element dynamically and add to DOM
+        function createQuestionElement(index) {
+          const question = questions[index];
+          const questionHTML = `
+                    <div class="question-container" id="question-${index + 1}">
+                        <div class="question-number">Question ${index + 1} of ${
+            questions.length
+          }</div>
+                        <div class="question-text">${question.question}</div>
+                        <div class="options-container">
+                            ${question.options
+                              .map(
+                                (option, i) =>
+                                  `<div class="option" data-value="${String.fromCharCode(
+                                    65 + i
+                                  )}">${String.fromCharCode(
+                                    65 + i
+                                  )}. ${option}</div>`
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                `;
+          $(".quiz-body").prepend(questionHTML);
+        }
+
+        // Show a specific question and hide others
+        function showQuestion(index) {
+          $(".question-container").removeClass("active");
+          $(`#question-${index + 1}`).addClass("active");
+          currentQuestion = index;
+
+          // Highlight previously selected option if exists
+          if (userAnswers[currentQuestion] !== null) {
+            $(`#question-${currentQuestion + 1} .option`).removeClass(
+              "selected"
+            );
+            $(
+              `#question-${currentQuestion + 1} .option[data-value="${
+                userAnswers[currentQuestion]
+              }"]`
+            ).addClass("selected");
+          }
+
+          updateProgressBar();
+          updateNavigationButtons();
+        }
+
+        // Update progress bar width based on current question
+        function updateProgressBar() {
+          const progress = ((currentQuestion + 1) / questions.length) * 100;
+          $(".progress").css("width", `${progress}%`);
+        }
+
+        // Update navigation buttons state based on current question
+        function updateNavigationButtons() {
+          $("#prev-btn").prop("disabled", currentQuestion === 0);
+
+          if (currentQuestion === questions.length - 1) {
+            $("#next-btn").hide();
+            $("#submit-btn").show();
+          } else {
+            $("#next-btn").show();
+            $("#submit-btn").hide();
+          }
+        }
+
+        // Start the quiz - hide intro and show first question
+        function startQuiz() {
+          quizStarted = true;
+          // Hide the intro page completely
+          $("#intro-page").hide();
+          // Show the first question
+          $("#question-1").addClass("active");
+          // Show navigation buttons
+          $("#quiz-navigation").addClass("active");
+          updateProgressBar();
+          updateNavigationButtons();
+        }
+
+        // Handle confirmation checkbox change - enable/disable start button
+        $("#confirm-start").change(function () {
+          $("#start-quiz").prop("disabled", !$(this).is(":checked"));
+        });
+
+        // Handle start button click - begin the quiz
+        $("#start-quiz").click(function () {
+          if ($("#confirm-start").is(":checked")) {
+            startQuiz();
+          }
+        });
+
+        // Handle option selection - mark selected answer
+        $(document).on("click", ".option", function () {
+          if (!quizStarted) return;
+
+          const questionContainer = $(this).closest(".question-container");
+          questionContainer.find(".option").removeClass("selected");
+          $(this).addClass("selected");
+
+          const selectedValue = $(this).data("value");
+          userAnswers[currentQuestion] = selectedValue;
+        });
+
+        // Handle next button click - move to next question
+        $("#next-btn").click(function () {
+          if (!quizStarted) return; // Prevent navigation if quiz hasn't started
+          if (currentQuestion < questions.length - 1) {
+            showQuestion(currentQuestion + 1);
+          }
+        });
+
+        // Handle previous button click - move to previous question
+        $("#prev-btn").click(function () {
+          if (!quizStarted) return; // Prevent navigation if quiz hasn't started
+          if (currentQuestion > 0) {
+            showQuestion(currentQuestion - 1);
+          }
+        });
+
+        // Handle submit button click - calculate and show results
+        $("#submit-btn").click(function () {
+          calculateScore();
+          showResults();
+        });
+
+        // Calculate the final score by comparing user answers with correct answers
+        function calculateScore() {
+          score = 0;
+          for (let i = 0; i < questions.length; i++) {
+            if (userAnswers[i] !== null) {
+              const correctAnswerChar = String.fromCharCode(
+                65 + questions[i].correctAnswer
+              );
+              if (userAnswers[i] === correctAnswerChar) {
+                score++;
+              }
+            }
+          }
+        }
+
+        // Show results screen with final score
+        function showResults() {
+          $(".quiz-body").hide();
+          $(".results-container").show();
+          $(".score").text(`${score}/${questions.length}`);
+          $(".score-text").text(
+            `You scored ${score} out of ${questions.length} questions correctly.`
+          );
+        }
+
+        // Handle restart button click - reset quiz to initial state
+        $(".restart-btn").click(function () {
+          // Reset quiz state
+          currentQuestion = 0;
+          score = 0;
+          userAnswers = new Array(questions.length).fill(null);
+          quizStarted = false;
+
+          // Reset UI
+          $(".question-container").removeClass("active");
+          $("#intro-page").show().addClass("active");
+          $("#quiz-navigation").removeClass("active");
+          $(".option").removeClass("selected");
+          $("#confirm-start").prop("checked", false);
+          $("#start-quiz").prop("disabled", true);
+
+          // Show quiz body, hide results
+          $(".quiz-body").show();
+          $(".results-container").hide();
+
+          updateProgressBar();
+          updateNavigationButtons();
+        });
+
+        // Initialize the quiz when document is ready
+        initializeQuiz();
+
+        // Additional protection - disable right-click to prevent accessing dev tools
+        $(document).on("contextmenu", function (e) {
+          e.preventDefault();
+          return false;
+        });
+
+        // Prevent F12 key - another common way to open dev tools
+        $(document).keydown(function (e) {
+          if (e.which === 123) {
+            // F12 key
+            return false;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
